@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ovenpic_mp3</title>
+    <style>
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #222;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Скрываем полосы прокрутки */
+        }
+
+        #player-container {
+            background-color: #333;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            width: 400px;
+            position: relative; /* Для позиционирования плеера в центре */
+        }
+
+        #song-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #ddd;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        #playlist {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto; /* Появляется полоса прокрутки, если список слишком длинный */
+        }
+
+        #playlist li {
+            padding: 10px;
+            background-color: #444;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #playlist li:hover {
+            background-color: #555;
+        }
+
+        #playlist li.active {
+            background-color: #666;
+            color: #fff;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 20px;
+            outline: none; /* Убираем обводку при фокусе */
+        }
+
+        /*  Необычные кнопки */
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #555;
+            color: #fff;
+            border: none;
+            border-radius: 50%; /* Круглые кнопки */
+            width: 50px;
+            height: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #777;
+        }
+
+        /* Анимация фона */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%; /* Больше ширины экрана */
+            height: 200%; /* Больше высоты экрана */
+            background: linear-gradient(45deg, #007bff, #663399, #e91e63, #ff9800);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s infinite alternate;
+            z-index: -1; /* Отправляем под контент */
+        }
+
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        
+
+    </style>
+</head>
+<body>
+
+    <div class="background-animation"></div>
+
+    <div id="player-container">
+        <h1 id="song-title">Выберите песню</h1>
+        <ul id="playlist">
+            <!-- Песни будут добавлены сюда скриптом -->
+        </ul>
+        <audio id="audio" controls></audio>
+    </div>
+
+    <script>
+        // Список песен (замените на свои)
+        const songs = [
+            { title: "ovenpic - Лесопарк", src: "Music/Лесопарк.ogg" },
+            { title: "ovenpic - 06_04_24", src: "Music/06_04_24.ogg" },
+            { title: "ovenpic - Бамп", src: "Music/Бамп.ogg" },
+            { title: "ovenpic - цветгооороода", src: "Music/цветгооороода.mp3" }
+        ];
+
+        const playlistElement = document.getElementById("playlist");
+        const songTitleElement = document.getElementById("song-title");
+        const audioElement = document.getElementById("audio");
+
+        let currentSongIndex = 0;
+
+        // Функция для загрузки песни
+        function loadSong(index) {
+            const song = songs[index];
+            audioElement.src = song.src;
+            songTitleElement.textContent = song.title;
+            audioElement.load(); // Важно для обновления источника
+            updateActiveSong(); // Обновляем активный элемент в списке
+        }
+
+        // Функция для обновления активного элемента в списке
+        function updateActiveSong() {
+            const playlistItems = document.querySelectorAll("#playlist li");
+            playlistItems.forEach((item, index) => {
+                if (index === currentSongIndex) {
+                    item.classList.add("active");
+                } else {
+                    item.classList.remove("active");
+                }
+            });
+        }
+
+        // Функция для создания элементов списка песен
+        function createPlaylist() {
+            songs.forEach((song, index) => {
+                const listItem = document.createElement("li");
+                listItem.textContent = song.title;
+                listItem.addEventListener("click", () => {
+                    currentSongIndex = index;
+                    loadSong(currentSongIndex);
+                    audioElement.play();
+                });
+                playlistElement.appendChild(listItem);
+            });
+        }
+
+        // Автоматическое переключение на следующую песню после окончания
+        audioElement.addEventListener("ended", () => {
+            currentSongIndex = (currentSongIndex + 1) % songs.length; // Переходим к следующей песне, зацикливаем
+            loadSong(currentSongIndex);
+            audioElement.play();
+        });
+
+        // Инициализация
+        createPlaylist();
+        loadSong(currentSongIndex); // Загружаем первую песню при загрузке страницы
+
+    </script>
+</body>
+</html>
